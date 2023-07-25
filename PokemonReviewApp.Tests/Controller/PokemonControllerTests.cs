@@ -53,8 +53,8 @@ namespace PokemonReviewApp.Tests.Controller
             var pokemonMap = A.Fake<Pokemon>();
             var pokemon = A.Fake<Pokemon>();
             var pokemonCreate = A.Fake<PokemonDto>();
-            var pokemons = A.Fake<ICollection<PokemonDto>>();
-            var pokmonList = A.Fake<IList<PokemonDto>>();
+            //var pokemons = A.Fake<ICollection<PokemonDto>>();
+            //var pokmonList = A.Fake<IList<PokemonDto>>();
             A.CallTo(() => _pokemonRepository.GetPokemonTrimToUpper(pokemonCreate)).Returns(pokemon);
             A.CallTo(() => _mapper.Map<Pokemon>(pokemonCreate)).Returns(pokemon);
             A.CallTo(() => _pokemonRepository.CreatePokemon(ownerId, catId, pokemonMap)).Returns(true);
@@ -65,6 +65,65 @@ namespace PokemonReviewApp.Tests.Controller
 
             //Assert
             result.Should().NotBeNull();
+        }
+        [Fact]
+        public void PokemonController_UpdatePokemon_ReturnOK() 
+        {
+            //Arrange
+            int ownerId = 1;
+            int catId = 2;
+            int pokeId= 3;
+            var updatedPokemonDto = new PokemonDto
+            {
+                Id = pokeId,
+                Name="Sunil"
+                // Set other properties of the updated PokemonDto here
+            };
+            var updatedPokemon = new Pokemon
+            {
+                Id = pokeId,
+                Name= "Sunil"
+                // Set other properties of the updated Pokemon here
+            };
+
+            A.CallTo(() => _pokemonRepository.PokemonExists(pokeId)).Returns(true);
+            A.CallTo(() => _mapper.Map<Pokemon>(updatedPokemonDto)).Returns(updatedPokemon);
+            A.CallTo(() => _pokemonRepository.UpdatePokemon(ownerId, catId, updatedPokemon)).Returns(true);
+            var controller = new PokemonController(_pokemonRepository, _reviewRepository, _mapper);
+
+            //Act
+            var result = controller.UpdatePokemon(pokeId,ownerId, catId, updatedPokemonDto);
+
+            //Assert
+            //result.Should().NotBeNull();
+            //result.Should().BeOfType<OkObjectResult>();
+            result.Should().NotBeNull().And.BeOfType<OkObjectResult>();
+            var okResult = result as OkObjectResult;
+            okResult.StatusCode.Should().Be(200);
+            okResult.Value.Should().Be("Successfully updated");
+        }
+
+        [Fact]
+        public void PokemonController_DeletePokemon_ReturnOK()
+        {
+            //Arrange
+            int pokeId = 3;
+            var pokemon = A.Fake<Pokemon>();
+            var pokemonDTO = A.Fake<PokemonDto>();
+            A.CallTo(() => _mapper.Map<Pokemon>(pokemonDTO)).Returns(pokemon);
+            A.CallTo(() => _pokemonRepository.PokemonExists(pokeId)).Returns(true);
+            A.CallTo(() => _pokemonRepository.DeletePokemon(pokemon)).Returns(true);
+            var controller = new PokemonController(_pokemonRepository, _reviewRepository, _mapper);
+
+            // Act
+            var result = controller.DeletePokemon(pokeId);
+
+            // Assert
+            result.Should().NotBeNull();
+            //result.Should().NotBeNull().And.BeOfType<OkObjectResult>();
+            //var okResult = result as OkObjectResult;
+            //okResult.StatusCode.Should().Be(200);
+            //okResult.Value.Should().Be("Successfully deleted");
         }
     }
 }
