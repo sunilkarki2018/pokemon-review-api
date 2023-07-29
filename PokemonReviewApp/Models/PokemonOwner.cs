@@ -1,4 +1,7 @@
-﻿namespace PokemonReviewApp.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+
+namespace PokemonReviewApp.Models
 {
     public class PokemonOwner
     {

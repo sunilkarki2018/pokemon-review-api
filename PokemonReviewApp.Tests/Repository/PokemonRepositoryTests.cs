@@ -46,8 +46,15 @@ namespace PokemonReviewApp.Tests.Repository
                                 Reviewer = new Reviewer(){ FirstName = "Jessica", LastName = "McGregor" } },
                             }
                     });
+
                     await databaseContext.SaveChangesAsync();
                 }
+
+
+                databaseContext.Owners.Add(new Owner { FirstName = "Sunil", LastName = "Karki",Gym="Test",Country=new Country() { Id=1,Name="Nepal"} });
+                databaseContext.Categories.Add(new Category { Id=1,Name = "Test Category" });
+                await databaseContext.SaveChangesAsync();
+
             }
             return databaseContext;
         }
@@ -82,5 +89,70 @@ namespace PokemonReviewApp.Tests.Repository
             result.Should().NotBe(0);
             result.Should().BeInRange(1, 10);
         }
+
+        // new added
+        [Fact]
+        public async void PokemonRepository_GetPokemons_ReturnsPokemons()
+        {
+            //Arrange
+            var dbContext = await GetDatabaseContext();
+            var pokemonRepository = new PokemonRepository(dbContext);
+
+            //Act
+            var result = pokemonRepository.GetPokemons();
+
+            //Assert
+            result.Should().NotBeNull();
+            result.Should().AllBeOfType<Pokemon>();
+        }
+        [Fact]
+        public async void PokemonRepository_PokemonExist_ReturnBool()
+        {
+            //Arrange
+            int pokemonId = 1;
+            var dbContext = await GetDatabaseContext();
+            var pokemonRepository = new PokemonRepository(dbContext);
+
+            //Act
+            var result = pokemonRepository.PokemonExists(pokemonId);
+
+            //Assert
+            result.Should().BeTrue();
+        }
+        [Fact]
+        public async void PokemonRepository_CreatePokemon_ReturnBool()
+        {
+            //Arrange
+            int pokemonId = 1;
+            int ownerId = 1;
+            int catId = 1;
+            var pokemon = new Pokemon()
+            {
+                Name = "Pikachu",
+                BirthDate = new DateTime(1903, 1, 1),
+                PokemonCategories = new List<PokemonCategory>()
+                            {
+                                new PokemonCategory { Category = new Category() { Name = "Electric"}}
+                            },
+                Reviews = new List<Review>()
+                            {
+                                new Review { Title="Pikachu",Text = "Pickahu is the best pokemon, because it is electric", Rating = 5,
+                                Reviewer = new Reviewer(){ FirstName = "Teddy", LastName = "Smith" } },
+                                new Review { Title="Pikachu", Text = "Pickachu is the best a killing rocks", Rating = 5,
+                                Reviewer = new Reviewer(){ FirstName = "Taylor", LastName = "Jones" } },
+                                new Review { Title="Pikachu",Text = "Pickchu, pickachu, pikachu", Rating = 1,
+                                Reviewer = new Reviewer(){ FirstName = "Jessica", LastName = "McGregor" } },
+                            }
+            };
+            var dbContext = await GetDatabaseContext();
+            var pokemonRepository = new PokemonRepository(dbContext);
+
+            //Act
+            var result = pokemonRepository.CreatePokemon(ownerId, catId, pokemon);
+
+            //Assert
+            result.Should().BeTrue();
+        }
+
     }
 }
